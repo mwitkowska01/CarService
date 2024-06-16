@@ -1,0 +1,70 @@
+﻿@page "/order"
+@inject IOrderService _orderService
+@inject IJSRuntime _js
+@inject NavigationManager _navigationManager
+
+<PageTitle>Serwis samochodowy | Usługi</PageTitle>
+<h1>Lista usług</h1>
+<br />
+<div>
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Pracownik</th>
+                    <th>Rejestracja Auta</th>
+                    <th>Data zgłoszenia</th>
+                    <th>Data ukończenia</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in personelList)
+                {
+                    <tr>
+                        <td>@p.Personel.Name  @p.Personel.LastName</td>
+                        <td>@p.Car.LicensePlate</td>
+                        <td>@p.AdmissionDate</td>
+                        <td>@p.CompletionDate</td>
+                        <td>
+                            <thead>
+                            <th>Nazwa usługi</th>
+                            </thead>
+                            <tbody>
+                            @foreach (var aa in p.Services)
+                            {
+                                <td>@p.Personel</td>
+                            }
+                             </tbody>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@code {
+    private List<OrderDto> personelList = null;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        personelList = _orderService.GetAll();
+    }
+    protected async Task DeletePersonel(int id)
+    {
+        var personel = personelList.First(q => q.Id == id);
+        var confirm = await _js.InvokeAsync<bool>("confirm", $"Jesteś pewien że chcesz usunąć pracownika: ?");
+        if (confirm)
+        {
+            _orderService.Delete(id);
+            OnInitialized();
+        }
+    }
+
+    protected async Task UpdatePersonel(int id)
+    {
+        _navigationManager.NavigateTo($"car/edit/{id}");
+    }
+}

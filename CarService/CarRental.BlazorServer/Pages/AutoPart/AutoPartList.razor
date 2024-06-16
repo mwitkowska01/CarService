@@ -1,0 +1,68 @@
+﻿@page "/autoPart"
+@inject IAutoPartService _autoPartService
+@inject IJSRuntime _js
+@inject NavigationManager _navigationManager
+
+<PageTitle>Serwis samochodowy | Części samochodów</PageTitle>
+<h1>Lista części samochodów</h1>
+<br />
+<div>
+    <div>
+        <a href="autoPart/add" class="btn bg-primary"><span class="oi oi-plus" aria-hidden="true"></span>Dodaj części aut</a>
+    </div>
+    <br />
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Cena</th>
+                    <th>Opis</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _autoPartList)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Price</td>
+                        <td>@p.Description</td>
+                        <td>
+                            <button class="btn bg-warning" @onclick="@(()=>UpdateCar(@p.Id))"><span class="oi oi-pencil" aria-hidden="true"></span>Edytuj</button>
+                            <button class="btn bg-danger" @onclick="@(()=>DeleteCar(@p.Id))"><span class="oi oi-delete" aria-hidden="true"></span>Usuń</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+@code {
+    private List<AutoPartDto> _autoPartList = null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _autoPartList = _autoPartService.GetAll();
+    }
+
+    protected async Task DeleteCar(int id)
+    {
+        var car = _autoPartList.First(q => q.Id == id);
+        var confirm = await _js.InvokeAsync<bool>("confirm", $"Jesteś pewien że chcesz usunąć Auto: {car.Name}?");
+        if (confirm)
+        {
+            _autoPartService.Delete(id);
+            OnInitialized();
+        }
+    }
+
+    protected async Task UpdateCar(int id)
+    {
+        _navigationManager.NavigateTo($"autopart/edit/{id}");
+    }
+}

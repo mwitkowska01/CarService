@@ -1,0 +1,64 @@
+﻿@page "/autopart/edit/{id:int}"
+@inject IAutoPartService autoPartService
+@inject NavigationManager _navigationManager
+
+<PageTitle>Serwis samochodowy: Edycja części samochodowej</PageTitle>
+<h1>Edycja części samochodowej</h1>
+<br />
+<EditForm Model="@autoPart" OnValidSubmit="@UpdateAutoPart">
+    <FluentValidationValidator @ref="_fluentValidationValidator" DisableAssemblyScanning="@true" />
+    <ValidationSummary />
+    <div class="form-group">
+        <label>Model: </label>
+        <InputText @bind-Value="@autoPart.Name" class="form-control" />
+        <ValidationMessage For="@(() => autoPart.Name)" />
+    </div>
+    <br/>
+    <div class="form-group">
+        <label>Model: </label>
+        <InputText @bind-Value="@autoPart.Description" class="form-control" />
+        <ValidationMessage For="@(() => autoPart.Description)" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Model: </label>
+        <InputNumber @bind-Value="@autoPart.Price" class="form-control" />
+        <ValidationMessage For="@(() => autoPart.Price)" />
+    </div>
+    <br />
+    <div class="form-group">
+        <button class="btn btn-primary" type="submit"> <span class="oi oi-pencil"></span>Zapisz</button>
+        <button @onclick="BackToList" class="btn btn-secondary" type="button">
+            <span class="oi oi-media-skip-backward"></span>
+            Wróć do listy
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    private AutoPartDto autoPart = null;
+    private string _oldImageUrl = null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var p = autoPartService.GetById(Id);
+        autoPart = new AutoPartDto() { Id = p.Id, Name = p.Name, Description = p.Description, Price = p.Price };
+    }
+
+    private void BackToList()
+    {
+        _navigationManager.NavigateTo("/autopart");
+    }
+    private void UpdateAutoPart()
+    {
+        autoPartService.Update(autoPart);
+        _navigationManager.NavigateTo("/autopart");
+    }
+
+}
